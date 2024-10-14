@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Estoque - Formulário</title>
+    <style>
+        /* Adicione seu CSS aqui ou link para o arquivo styles.css */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            width: 50%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input, select {
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 16px;
+            color: green;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Controle de Estoque Berrys</h1>
+        <form name="submit-to-google-sheet" id="stock-form">
+            <label for="codigo">Código:</label>
+            <input type="text" id="codigo" name="codigo" required>
+		<!--	
+			  <label for="codigo">Produto:</label>
+            <input type="text" id="codigo" name="produto"  readonly >
+			-->
+            <label for="data">Data:</label>
+            <input type="date" id="data" name="data" required>
+			
+            <label for="saida">Saída / KG:</label>
+            <input type="text" id="saida" name="saida" required>
+
+            <label for="ordem">Ordem (número):</label>
+            <input type="text" id="ordem" name="ordem" required>
+
+            <label for="responsavel">Responsável:</label>
+            <input type="text" id="responsavel" name="responsavel" required>
+
+            <button type="submit">Enviar</button>
+        </form>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbw8qzFHu_WvNJiNULDaIhF7GxQB3vITacPCuLJM_NytCOWTYB8Z5sRz_s9XBBE97wTUOw/exec'; // Substitua pela sua URL do Web App
+        const form = document.forms['submit-to-google-sheet'];
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+
+            // Exibir o status de "Enviando dados..."
+            const sendingStatus = document.createElement('p');
+            sendingStatus.textContent = 'Enviando dados...';
+            sendingStatus.style.position = 'fixed';
+            sendingStatus.style.top = '50%';
+            sendingStatus.style.left = '50%';
+            sendingStatus.style.transform = 'translate(-50%, -50%)';
+            sendingStatus.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+            sendingStatus.style.padding = '20px';
+            sendingStatus.style.borderRadius = '5px';
+            sendingStatus.style.color = 'black';
+            sendingStatus.style.fontSize = '20px';
+            document.body.appendChild(sendingStatus);
+
+            fetch(scriptURL, { method: 'POST', body: new FormData(form) })
+                .then(response => response.json())
+                .then(result => {
+                    console.log('Success!', result);
+                    document.body.removeChild(sendingStatus);
+
+                    if(result.result === 'success') {
+                        const successStatus = document.createElement('p');
+                        successStatus.textContent = 'Dados enviados com sucesso!';
+                        successStatus.style.position = 'fixed';
+                        successStatus.style.top = '50%';
+                        successStatus.style.left = '50%';
+                        successStatus.style.transform = 'translate(-50%, -50%)';
+                        successStatus.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                        successStatus.style.padding = '20px';
+                        successStatus.style.borderRadius = '5px';
+                        successStatus.style.fontSize = '20px';
+                        successStatus.style.color = 'green';
+                        document.body.appendChild(successStatus);
+
+                        setTimeout(() => {
+                            document.body.removeChild(successStatus);
+                        }, 4000); // Remove após 3 segundos
+						
+                    } else {
+                        const errorStatus = document.createElement('p');
+                        errorStatus.textContent = 'Erro ao enviar os dados: ' + result.message;
+                        errorStatus.style.position = 'fixed';
+                        errorStatus.style.top = '50%';
+                        errorStatus.style.left = '50%';
+                        errorStatus.style.transform = 'translate(-50%, -50%)';
+                        errorStatus.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                        errorStatus.style.padding = '20px';
+                        errorStatus.style.borderRadius = '5px';
+                        errorStatus.style.fontSize = '20px';
+                        errorStatus.style.color = 'red';
+                        document.body.appendChild(errorStatus);
+
+                        setTimeout(() => {
+                            document.body.removeChild(errorStatus);
+                        }, 6000); // Remove após 5 segundos
+                    }
+					
+					  
+                })
+                .catch(error => {
+                    console.error('Error!', error.message);
+                    document.body.removeChild(sendingStatus);
+
+                    const errorStatus = document.createElement('p');
+                    errorStatus.textContent = 'Erro ao enviar os dados.';
+                    errorStatus.style.position = 'fixed';
+                    errorStatus.style.top = '50%';
+                    errorStatus.style.left = '50%';
+                    errorStatus.style.transform = 'translate(-50%, -50%)';
+                    errorStatus.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                    errorStatus.style.padding = '20px';
+                    errorStatus.style.borderRadius = '5px';
+                    errorStatus.style.fontSize = '20px';
+                    errorStatus.style.color = 'red';
+                    document.body.appendChild(errorStatus);
+
+                    setTimeout(() => {
+                        document.body.removeChild(errorStatus);
+                    }, 5000); // Remove após 5 segundos
+                });
+				
+				function reloadAfterDelay() {
+					setTimeout(function() {
+						location.reload();
+					}, 6000); // 5000 milissegundos = 5 segundos
+				}
+
+					// Chama a função
+					reloadAfterDelay();
+				
+        });
+		
+		
+    </script>
+</body>
+</html>
